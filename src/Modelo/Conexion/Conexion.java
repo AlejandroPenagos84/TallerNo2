@@ -4,6 +4,8 @@
  */
 package Modelo.Conexion;
 
+import Controlador.Control;
+import Modelo.VIP;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,38 +43,6 @@ public class Conexion {
     }
 
     /**
-     * Rellena de espacios o corta el String según sea el caso.
-     *
-     * @param m String
-     * @param num Número máximo de caracteres
-     * @return
-     */
-    public String ValidarString(String m, int num) {
-        if (m.length() < num) {
-            for (int i = m.length(); i < num; i++) {
-                m += " ";
-            }
-        } else {
-            m = m.substring(0, num);
-        }
-        return m;
-    }
-
-    /**
-     * Crea un String con caracteres dentro de una ArrayList
-     *
-     * @param letras Lista de letras de un String
-     * @return newString
-     */
-    public StringBuilder ValidarListas(ArrayList<Character> letras) {
-        StringBuilder newString = new StringBuilder(letras.size());
-        for (Character ch : letras) {
-            newString.append(ch);
-        }
-        return newString;
-    }
-
-    /**
      * Cuenta cuantas personas se encuentras registradas
      *
      * @return cantReg Cantidad de Registros
@@ -85,6 +55,9 @@ public class Conexion {
         return this.canreg;
     }
 
+    /**
+     *Se encarga de cerrar el RandomAccessFile
+     **/
     public void cerrar() {
         try {
             fl.close();
@@ -102,14 +75,14 @@ public class Conexion {
          * @param numBoletas Número de boletas que va a comprar
          * @param concierto Concierto al que quiere ir la persona
          */
-    public void Escribir(String cedula, String nombre, String correoElectronico, String telefono, int numBoletas, String concierto) {
+    public void RegistrarCompradores(VIP comprador, Control con) {
         try {
             ArrayList<Character> letrasCorreo = new ArrayList();
             ArrayList<Character> letrasServidor = new ArrayList();
             int k = -1;
 
-            for (int i = 0; i < correoElectronico.length(); i++) {
-                char c = correoElectronico.charAt(i);
+            for (int i = 0; i < comprador.getCorreoElectronico().length(); i++) {
+                char c = comprador.getCorreoElectronico().charAt(i);
                 if (c != '@') {
                     if (k == -1) { // Todavía no se ha encontrado la '@'
                         letrasCorreo.add(c);
@@ -123,15 +96,15 @@ public class Conexion {
 
             }
 
-            String correo = this.ValidarListas(letrasCorreo).toString();
-            String servidor = this.ValidarListas(letrasServidor).toString();
+            String correo = con.ConvertirListasAString(letrasCorreo).toString();
+            String servidor = con.ConvertirListasAString(letrasServidor).toString();
 
-            String cedulaArch = this.ValidarString(cedula, 10);
-            String nombreArch = this.ValidarString(nombre, 50);
-            String correoArch = this.ValidarString(correo, 20);
-            String servidorArch = this.ValidarString(servidor, 7);
-            String telefonoArch = this.ValidarString(telefono, 10);
-            String conciertoArch = this.ValidarString(concierto, 17);
+            String cedulaArch = con.RellenarYValidarString(comprador.getCedula(), 10);
+            String nombreArch = con.RellenarYValidarString(comprador.getNombre(), 50);
+            String correoArch = con.RellenarYValidarString(correo, 20);
+            String servidorArch = con.RellenarYValidarString(servidor, 7);
+            String telefonoArch = con.RellenarYValidarString(comprador.getTelefono(), 10);
+            String conciertoArch = con.RellenarYValidarString(comprador.getConcierto(), 17);
 
             /////////////////////////////////////////////////////////
             /* 
@@ -153,7 +126,7 @@ public class Conexion {
             fl.writeChars(servidorArch);
             fl.writeChars(telefonoArch);
             fl.writeChars(conciertoArch);
-            fl.writeInt(numBoletas);
+            fl.writeInt(comprador.getNumBoletas());
             
         } catch (FileNotFoundException f) {
         } catch (IOException ioe) {
